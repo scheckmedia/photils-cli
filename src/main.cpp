@@ -10,6 +10,7 @@
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/program_options.hpp>
+#include "inference.h"
 
 using namespace std;
 using namespace photils;
@@ -30,15 +31,16 @@ int main(int argc, const char *argv[])
     try
     {
         po::options_description desc {"Options"};
-        desc.add_options()("image", po::value<uint16_t>()->required(), "Input Port");
+        desc.add_options()("image", po::value<std::string>()->required(), "Image to predict keywords");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
 
-        if (vm.count("inport") && vm.count("outport"))
+        if (vm.count("image"))
         {
             auto image = vm["image"].as<std::string>();
+            std::cout << Inference::getInstance().get_tags(image);
         }
     }
     catch (const po::error &ex)

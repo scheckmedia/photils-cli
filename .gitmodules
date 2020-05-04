@@ -1,4 +1,0 @@
-[submodule "libs/cpp-netlib"]
-	path = libs/cpp-netlib
-	url = git@github.com:cpp-netlib/cpp-netlib.git
-	branch = 0.13-release

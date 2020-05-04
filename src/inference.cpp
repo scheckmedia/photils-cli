@@ -13,40 +13,32 @@ using namespace std::chrono_literals;
 namespace base64 = boost::beast::detail::base64;
 
 Inference::Inference()
-    : m_http_requests_running(true)
-    , m_request_queue()
 {
-    m_mean = cv::Scalar(103.939, 116.779, 123.68);
     load_model();
-
-    http::client::options options;
-    options.follow_redirects(true).cache_resolved(true).timeout(30).always_verify_peer(false);
-    m_http_client = std::unique_ptr<http::client>(new http::client(options));
-    // m_http_requests = std::thread(&Inference::run_http_requests, this);
 }
 
-Inference::~Inference()
+std::string Inference::get_tags(std::string filepath)
 {
-    m_http_requests_running = false;
+    if (!boost::filesystem::exists(filepath))
+    {
+        std::cout << "File does not exist!\n" << filepath << std::endl;
+        return "";
+    }
 
-    if (m_http_requests.joinable())
-        m_http_requests.join();
+    auto image = cv::imread(filepath);
+    auto feature = get_feature(image);
+    std::string tags = tag_request(feature);
+    return tags;
 }
 
 cv::Mat Inference::get_feature(cv::Mat image)
 {
-    auto t1 = std::chrono::high_resolution_clock::now();
-    auto blob = blobFromImage(image, 1, cv::Size(CNN_INPUT_WIDHT, CNN_INPUT_HEIGHT), m_mean, true, false);
+    auto blob =
+        blobFromImage(image, 1 / 127.5f, cv::Size(CNN_INPUT_WIDHT, CNN_INPUT_HEIGHT), cv::Scalar(1, 1, 1), true, false);
     m_cnn.setInput(blob);
 
     auto feature = m_cnn.forward();
     return feature;
-
-    /*std::unique_lock<std::mutex> lock(m_request_queue_mtx);
-    auto feature = m_cnn.forward();
-    m_request_queue.emplace(id, feature.clone());
-    lock.unlock();
-    m_request_queue_cond.notify_one();*/
 }
 
 cv::Mat Inference::decode_image(std::string base64_string)
@@ -72,40 +64,80 @@ std::string Inference::encode_feature(cv::Mat feature)
 void Inference::load_model()
 {
     if (!boost::filesystem::exists(CNN_MODEL_PATH))
+    {
+        std::cout << "File not found: " << CNN_MODEL_PATH;
         return;
+    }
 
     m_cnn = readNetFromTensorflow(CNN_MODEL_PATH);
-    m_cnn.setPreferableBackend(DNN_BACKEND_OPENCV);
+    m_cnn.setPreferableBackend(DNN_BACKEND_DEFAULT);
 }
 
-void Inference::run_http_requests()
+size_t Inference::curlWriteFnc(char *ptr, size_t size, size_t nmemb, std::string *stream)
 {
-    http::client::options options;
-    options.follow_redirects(true).cache_resolved(true).timeout(10).always_verify_peer(false);
-    http::client client(options);
-    http::client::request request(API_URL);
+    int realsize = size * nmemb;
+    stream->append(ptr, realsize);
+    return realsize;
+}
 
-    while (m_http_requests_running)
+std::string Inference::tag_request(cv::Mat feature)
+{
+    std::ostringstream out;
+    auto encoded_feature = encode_feature(feature);
+    std::string url(API_URL);
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    CURL *curl = curl_easy_init();
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "Accept: application/json");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, "charset: utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    if (curl)
     {
-        std::unique_lock<std::mutex> lock(m_request_queue_mtx);
-        while (m_request_queue.empty())
+        long httpCode(0);
+        std::string response;
+        std::string errBuffer;
+
+        std::string json = "{\"feature\": \"" + encoded_feature + "\"}";
+        curl_easy_setopt(curl, CURLOPT_PROXY, "");
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
+        curl_easy_setopt(curl, CURLOPT_POST, 1);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json.c_str()));
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFnc);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (std::string *)&response);
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+        curl_easy_cleanup(curl);
+
+        if (res == CURLE_OK && httpCode == 200)
         {
-            m_request_queue_cond.wait(lock);
+            Json::Value data;
+            Json::CharReaderBuilder builder;
+            Json::String err;
+            const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+            if (!reader->parse(response.c_str(), response.c_str() + response.length(), &data, &err))
+            {
+                // error handling
+            }
+
+            auto tags = data["tags"];
+
+            for (int i = 0; i < tags.size(); ++i)
+            {
+                auto tag = tags.get(i, "").asString();
+                out << tag << std::endl;
+            }
         }
-
-        auto item = m_request_queue.front();
-        m_request_queue.pop();
-        auto feature = item.second;
-        lock.unlock();
-
-        auto total = feature.total() * feature.elemSize();
-        std::string feature_encoded;
-        feature_encoded.resize(base64::encoded_size(total));
-        base64::encode(&feature_encoded[0], reinterpret_cast<char *>(feature.data), total);
-
-        auto json = "{\"feature\": \"" + feature_encoded + "\"}";
-        auto response = client.post(request, json, "application/json");
-        std::string out = body(response);
-        std::cout << "id: " << item.first << "bval: " << out << std::endl;
     }
+
+    curl_global_cleanup();
+
+    return out.str();
 }
