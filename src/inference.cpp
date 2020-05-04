@@ -17,18 +17,17 @@ Inference::Inference()
     load_model();
 }
 
-std::string Inference::get_tags(std::string filepath)
+int Inference::get_tags(std::string filepath, std::ostringstream *out)
 {
     if (!boost::filesystem::exists(filepath))
     {
         std::cout << "File does not exist!\n" << filepath << std::endl;
-        return "";
+        return EXIT_FAILURE;
     }
 
     auto image = cv::imread(filepath);
     auto feature = get_feature(image);
-    std::string tags = tag_request(feature);
-    return tags;
+    return tag_request(feature, out);
 }
 
 cv::Mat Inference::get_feature(cv::Mat image)
@@ -80,9 +79,8 @@ size_t Inference::curlWriteFnc(char *ptr, size_t size, size_t nmemb, std::string
     return realsize;
 }
 
-std::string Inference::tag_request(cv::Mat feature)
+int Inference::tag_request(cv::Mat feature, std::ostringstream *out)
 {
-    std::ostringstream out;
     auto encoded_feature = encode_feature(feature);
     std::string url(API_URL);
 
@@ -98,46 +96,46 @@ std::string Inference::tag_request(cv::Mat feature)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    if (curl)
+    if (!curl)
+        return EXIT_FAILURE;
+
+    long httpCode(0);
+    std::string response;
+    std::string errBuffer;
+
+    std::string json = "{\"feature\": \"" + encoded_feature + "\"}";
+    curl_easy_setopt(curl, CURLOPT_PROXY, "");
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json.c_str()));
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFnc);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (std::string *)&response);
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK || httpCode != 200)
+        return EXIT_FAILURE;
+
+    Json::Value data;
+    Json::CharReaderBuilder builder;
+    Json::String err;
+    const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    if (!reader->parse(response.c_str(), response.c_str() + response.length(), &data, &err))
     {
-        long httpCode(0);
-        std::string response;
-        std::string errBuffer;
+        return EXIT_FAILURE;
+    }
 
-        std::string json = "{\"feature\": \"" + encoded_feature + "\"}";
-        curl_easy_setopt(curl, CURLOPT_PROXY, "");
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
-        curl_easy_setopt(curl, CURLOPT_POST, 1);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json.c_str()));
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFnc);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (std::string *)&response);
-        CURLcode res = curl_easy_perform(curl);
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-        curl_easy_cleanup(curl);
+    auto tags = data["tags"];
 
-        if (res == CURLE_OK && httpCode == 200)
-        {
-            Json::Value data;
-            Json::CharReaderBuilder builder;
-            Json::String err;
-            const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
-            if (!reader->parse(response.c_str(), response.c_str() + response.length(), &data, &err))
-            {
-                // error handling
-            }
-
-            auto tags = data["tags"];
-
-            for (int i = 0; i < tags.size(); ++i)
-            {
-                auto tag = tags.get(i, "").asString();
-                out << tag << std::endl;
-            }
-        }
+    for (uint i = 0; i < tags.size(); ++i)
+    {
+        auto tag = tags.get(i, "").asString();
+        *out << tag << std::endl;
     }
 
     curl_global_cleanup();
 
-    return out.str();
+    return EXIT_SUCCESS;
 }

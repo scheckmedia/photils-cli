@@ -35,7 +35,7 @@ public:
         return instance;
     }
 
-    std::string get_tags(std::string filepath);
+    int get_tags(std::string filepath, std::ostringstream *out);
 
     Inference(Inference const &) = delete;
     void operator=(Inference const &) = delete;
@@ -49,7 +49,7 @@ private:
     cv::Mat get_feature(cv::Mat image);
     cv::Mat decode_image(std::string base64_string);
     std::string encode_feature(cv::Mat feature);
-    std::string tag_request(cv::Mat feature);
+    int tag_request(cv::Mat feature, std::ostringstream *out);
 
     cv::dnn::Net m_cnn;
 };
