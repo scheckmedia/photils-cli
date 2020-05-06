@@ -12,9 +12,9 @@
 using namespace photils;
 using namespace std::chrono_literals;
 
-Inference::Inference()
+void Inference::set_app_path(std::filesystem::__cxx11::path app_path)
 {
-    load_model();
+    this->m_app_path = app_path;
 }
 
 int Inference::get_tags(std::string filepath, std::ostringstream *out)
@@ -24,6 +24,10 @@ int Inference::get_tags(std::string filepath, std::ostringstream *out)
         std::cout << "File does not exist!\n" << filepath << std::endl;
         return EXIT_FAILURE;
     }
+
+    if(m_model == nullptr && load_model() != EXIT_SUCCESS)
+        return  EXIT_FAILURE;
+
 
     auto image = cv::imread(filepath);
     cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
@@ -61,22 +65,27 @@ std::string Inference::encode_feature(cv::Mat feature)
     return feature_encoded;
 }
 
-void Inference::load_model()
-{
-    if (!std::filesystem::exists(CNN_MODEL_PATH))
+int Inference::load_model()
+{    
+    auto path = m_app_path;
+    path += std::filesystem::path(CNN_MODEL_PATH);
+
+    if (!std::filesystem::exists(path))
     {
-        std::cout << "File not found: " << CNN_MODEL_PATH;
-        return;
+        std::cout << "File not found: " << path.string();
+        return EXIT_FAILURE;
     }
 
-    m_model = tflite::FlatBufferModel::BuildFromFile(CNN_MODEL_PATH);
+    m_model = tflite::FlatBufferModel::BuildFromFile(path.string().c_str());
     tflite::ops::builtin::BuiltinOpResolver resolver;
     tflite::InterpreterBuilder builder(*m_model, resolver);
     builder(&m_interpreter);
     if (m_interpreter->AllocateTensors() != kTfLiteOk)
     {
-        // error
+        return EXIT_FAILURE;
     }
+
+    return EXIT_SUCCESS;
 }
 
 size_t Inference::curlWriteFnc(char *ptr, size_t size, size_t nmemb, std::string *stream)
@@ -111,8 +120,9 @@ int Inference::tag_request(cv::Mat feature, std::ostringstream *out)
     std::string errBuffer;
 
     std::string json = "{\"feature\": \"" + encoded_feature + "\"}";
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1 );
     curl_easy_setopt(curl, CURLOPT_PROXY, "");
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
+    //curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
     curl_easy_setopt(curl, CURLOPT_POST, 1);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json.c_str()));
