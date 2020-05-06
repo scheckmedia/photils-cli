@@ -1,5 +1,6 @@
 #include "inference.h"
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -18,7 +19,7 @@ Inference::Inference()
 
 int Inference::get_tags(std::string filepath, std::ostringstream *out)
 {
-    if (!boost::filesystem::exists(filepath))
+    if (!std::filesystem::exists(filepath))
     {
         std::cout << "File does not exist!\n" << filepath << std::endl;
         return EXIT_FAILURE;
@@ -62,7 +63,7 @@ std::string Inference::encode_feature(cv::Mat feature)
 
 void Inference::load_model()
 {
-    if (!boost::filesystem::exists(CNN_MODEL_PATH))
+    if (!std::filesystem::exists(CNN_MODEL_PATH))
     {
         std::cout << "File not found: " << CNN_MODEL_PATH;
         return;

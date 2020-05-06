@@ -1,41 +1,36 @@
+#include <cxxopts.hpp>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <boost/program_options.hpp>
 #include "inference.h"
 
 using namespace std;
 using namespace photils;
 
-namespace po = boost::program_options;
-
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
     try
     {
-        po::options_description desc {"Options"};
-        desc.add_options()("help,h", "produce help message")(
-            "image,i", po::value<std::string>()->required(), "Image to predict keywords")(
-            "output_file,o", po::value<std::string>()->default_value(""), "File where to write keywords. Optional");
+        cxxopts::Options options("photils-cli", "Extract meaningful keywords of your images");
+        options.add_options()("i,image", "Image to predict keywords", cxxopts::value<std::string>())(
+            "o,output_file", "File where to write keywords. Optional", cxxopts::value<std::string>()->default_value(""));
 
-        po::variables_map vm;
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        auto result = options.parse(argc, argv);
 
-        if (vm.count("help"))
+        if (result.count("help"))
         {
-            cout << desc << "\n";
+            std::cout << options.help({"", "Group"}) << std::endl;
             return EXIT_SUCCESS;
         }
 
-        po::notify(vm);
-
-        if (vm.count("image"))
+        if (result.count("image"))
         {
-            auto image = vm["image"].as<std::string>();
+            auto image = result["image"].as<std::string>();
+
             std::ostringstream out;
             int ret = Inference::getInstance().get_tags(image, &out);
-            auto outputPath = vm["output_file"].as<std::string>();
+            auto outputPath = result["output_file"].as<std::string>();
 
             if (!outputPath.empty())
             {
@@ -54,7 +49,7 @@ int main(int argc, const char *argv[])
             std::exit(ret);
         }
     }
-    catch (const po::error &ex)
+    catch (const cxxopts::OptionException &ex)
     {
         std::cerr << ex.what() << '\n';
         std::exit(EXIT_FAILURE);

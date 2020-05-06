@@ -6,8 +6,6 @@
 #define CNN_INPUT_HEIGHT 224
 #define API_URL "https://api.photils.app/tags"
 
-#include <boost/filesystem.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <opencv2/core/core.hpp>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
@@ -16,7 +14,6 @@
 #include <curl/curl.h>
 #include <json/json.h>
 
-namespace pt = boost::property_tree;
 namespace photils
 {
 class Inference
