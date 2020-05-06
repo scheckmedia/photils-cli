@@ -1,16 +1,15 @@
 #include "inference.h"
 #include <chrono>
 #include <fstream>
+#include <iostream>
 #include <numeric>
 #include <sstream>
-#include <boost/beast/core/detail/base64.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include "base64.h"
 
 using namespace photils;
 using namespace std::chrono_literals;
-namespace base64 = boost::beast::detail::base64;
 
 Inference::Inference()
 {
@@ -26,37 +25,38 @@ int Inference::get_tags(std::string filepath, std::ostringstream *out)
     }
 
     auto image = cv::imread(filepath);
-    auto feature = get_feature(image);
+    cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+    cv::resize(image, image, cv::Size(CNN_INPUT_WIDHT, CNN_INPUT_HEIGHT), 0, 0, cv::InterpolationFlags::INTER_NEAREST);
+    image.convertTo(image, CV_32FC3, 1 / 255.0, -1.0);
+
+    cv::Mat feature;
+    int ret = get_feature(image, feature);
+    if (ret != kTfLiteOk)
+        return EXIT_FAILURE;
+
     return tag_request(feature, out);
 }
 
-cv::Mat Inference::get_feature(cv::Mat image)
+int Inference::get_feature(cv::Mat image, cv::Mat &feature_out)
 {
-    auto blob =
-        blobFromImage(image, 1 / 127.5f, cv::Size(CNN_INPUT_WIDHT, CNN_INPUT_HEIGHT), cv::Scalar(1, 1, 1), true, false);
-    m_cnn.setInput(blob);
+    auto input = m_interpreter->typed_tensor<float>(0);
 
-    auto feature = m_cnn.forward();
-    return feature;
-}
+    std::memcpy(input, image.data, image.total() * image.elemSize());
+    int ret = m_interpreter->Invoke();
 
-cv::Mat Inference::decode_image(std::string base64_string)
-{
-    std::vector<uchar> decoded_string;
-    decoded_string.resize(base64::decoded_size(base64_string.size()));
-    base64::decode(decoded_string.data(), base64_string.data(), base64_string.size());
+    auto output = m_interpreter->outputs()[0];
+    auto result = m_interpreter->tensor(output);
 
-    cv::Mat image;
-    cv::imdecode(decoded_string, 1, &image);
-    return image;
+    feature_out.create(result->dims->data[0], result->dims->data[1], CV_32F);
+    std::memcpy(feature_out.data, result->data.data, result->bytes);
+    return ret;
 }
 
 std::string Inference::encode_feature(cv::Mat feature)
 {
     auto total = feature.total() * feature.elemSize();
-    std::string feature_encoded;
-    feature_encoded.resize(base64::encoded_size(total));
-    base64::encode(&feature_encoded[0], reinterpret_cast<char *>(feature.data), total);
+    auto in = std::string(reinterpret_cast<char *>(feature.data), total);
+    auto feature_encoded = macaron::Base64::Encode(in);
     return feature_encoded;
 }
 
@@ -68,8 +68,14 @@ void Inference::load_model()
         return;
     }
 
-    m_cnn = readNetFromTensorflow(CNN_MODEL_PATH);
-    m_cnn.setPreferableBackend(DNN_BACKEND_DEFAULT);
+    m_model = tflite::FlatBufferModel::BuildFromFile(CNN_MODEL_PATH);
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    tflite::InterpreterBuilder builder(*m_model, resolver);
+    builder(&m_interpreter);
+    if (m_interpreter->AllocateTensors() != kTfLiteOk)
+    {
+        // error
+    }
 }
 
 size_t Inference::curlWriteFnc(char *ptr, size_t size, size_t nmemb, std::string *stream)
@@ -120,7 +126,7 @@ int Inference::tag_request(cv::Mat feature, std::ostringstream *out)
 
     Json::Value data;
     Json::CharReaderBuilder builder;
-    Json::String err;
+    std::string err;
     const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
     if (!reader->parse(response.c_str(), response.c_str() + response.length(), &data, &err))
     {

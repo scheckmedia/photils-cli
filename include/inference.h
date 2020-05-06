@@ -1,29 +1,22 @@
 #ifndef INFERENCE_H
 #define INFERENCE_H
 
-//#define BOOST_NETWORK_ENABLE_HTTPS
-
-#define CNN_MODEL_PATH "../share/photils/model.pb"
+#define CNN_MODEL_PATH "../share/photils/model.tflite"
 #define CNN_INPUT_WIDHT 224
 #define CNN_INPUT_HEIGHT 224
 #define API_URL "https://api.photils.app/tags"
 
-#include <condition_variable>
-#include <memory>
-#include <mutex>
-
-#include <thread>
+#include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <opencv2/dnn.hpp>
-#include <opencv2/imgproc.hpp>
-#include <queue>
+#include <opencv2/core/core.hpp>
+#include <tensorflow/lite/interpreter.h>
+#include <tensorflow/lite/kernels/register.h>
+#include <tensorflow/lite/model.h>
 
 #include <curl/curl.h>
 #include <json/json.h>
 
-using namespace cv::dnn;
 namespace pt = boost::property_tree;
-
 namespace photils
 {
 class Inference
@@ -46,12 +39,12 @@ private:
     void init_curl();
     static size_t curlWriteFnc(char *ptr, size_t size, size_t nmemb, std::string *stream);
 
-    cv::Mat get_feature(cv::Mat image);
-    cv::Mat decode_image(std::string base64_string);
+    int get_feature(cv::Mat image, cv::Mat &feature_out);
     std::string encode_feature(cv::Mat feature);
     int tag_request(cv::Mat feature, std::ostringstream *out);
 
-    cv::dnn::Net m_cnn;
+    std::unique_ptr<tflite::FlatBufferModel> m_model;
+    std::unique_ptr<tflite::Interpreter> m_interpreter;
 };
 } // namespace photils
 
