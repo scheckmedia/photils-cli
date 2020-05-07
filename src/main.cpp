@@ -17,7 +17,6 @@ int main(int argc, char *argv[])
     try
     {       
         auto app_path = std::filesystem::read_symlink("/proc/self/exe").remove_filename();
-        std::cout << app_path;
         cxxopts::Options options("photils-cli", "Extract meaningful keywords of your images");
         options.add_options()
             ("h,help", "print this help")
