@@ -51,7 +51,6 @@ pkg_check_modules(JSONCPP jsoncpp)
 link_directories(${JSONCPP_LIBRARY_DIRS})
 
 get_filename_component(RESOURCE_FOLDER ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DIRECTORY)
-message("haaa ${RESOURCE_FOLDER}")
 
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
@@ -69,5 +68,5 @@ add_custom_command(
  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/res/model.* ${RESOURCE_FOLDER}/share/photils/
 )
 
-# install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-# install(DIRECTORY  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/../share/photils/ DESTINATION share/photils)
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(DIRECTORY  ${RESOURCE_FOLDER}/share/photils/ DESTINATION ${CMAKE_INSTALL_PREFIX}/share/photils)
