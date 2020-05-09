@@ -1,11 +1,24 @@
 #include <cxxopts.hpp>
 #include <fstream>
 #include <iostream>
+#include <libgen.h>
 #include <memory>
 #include <sstream>
-#include <filesystem>
-#include <linux/limits.h>
-#include <libgen.h>
+#if __APPLE__
+#    include <mach-o/dyld.h>
+#endif
+
+#if defined(__cplusplus) && __cplusplus >= 201703L && defined(__has_include)
+#    if __has_include(<filesystem>)
+#        define GHC_USE_STD_FS
+#        include <filesystem>
+namespace fs = std::filesystem;
+#    endif
+#endif
+#ifndef GHC_USE_STD_FS
+#    include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
 
 #include "inference.h"
 
@@ -15,13 +28,22 @@ using namespace photils;
 int main(int argc, char *argv[])
 {
     try
-    {       
-        auto app_path = std::filesystem::read_symlink("/proc/self/exe").remove_filename();
+    {
+        auto app_path = fs::path();
+#if __APPLE__
+        char buff[1024];
+        uint32_t size = sizeof(buff);
+        if (_NSGetExecutablePath(buff, &size) == 0)
+        {
+            app_path.assign(buff).remove_filename();
+        }
+#else
+        app_path = fs::read_symlink("/proc/self/exe").remove_filename();
+#endif
         cxxopts::Options options("photils-cli", "Extract meaningful keywords of your images");
-        options.add_options()
-            ("h,help", "print this help")
-            ("i,image", "Image to predict keywords", cxxopts::value<std::string>())
-            ("o,output_file", "File where to write keywords. Optional", cxxopts::value<std::string>()->default_value(""));
+        options.add_options()("h,help",
+                              "print this help")("i,image", "Image to predict keywords", cxxopts::value<std::string>())(
+            "o,output_file", "File where to write keywords. Optional", cxxopts::value<std::string>()->default_value(""));
 
         auto result = options.parse(argc, argv);
 

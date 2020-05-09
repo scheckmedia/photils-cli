@@ -1,6 +1,5 @@
 #include "inference.h"
 #include <chrono>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -12,22 +11,21 @@
 using namespace photils;
 using namespace std::chrono_literals;
 
-void Inference::set_app_path(std::filesystem::__cxx11::path app_path)
+void Inference::set_app_path(fs::path app_path)
 {
     this->m_app_path = app_path;
 }
 
 int Inference::get_tags(std::string filepath, std::ostringstream *out)
 {
-    if (!std::filesystem::exists(filepath))
+    if (!fs::exists(filepath))
     {
         std::cout << "File does not exist!\n" << filepath << std::endl;
         return EXIT_FAILURE;
     }
 
-    if(m_model == nullptr && load_model() != EXIT_SUCCESS)
-        return  EXIT_FAILURE;
-
+    if (m_model == nullptr && load_model() != EXIT_SUCCESS)
+        return EXIT_FAILURE;
 
     auto image = cv::imread(filepath);
     cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
@@ -66,11 +64,11 @@ std::string Inference::encode_feature(cv::Mat feature)
 }
 
 int Inference::load_model()
-{    
+{
     auto path = m_app_path;
-    path += std::filesystem::path(CNN_MODEL_PATH);
+    path += fs::path(CNN_MODEL_PATH);
 
-    if (!std::filesystem::exists(path))
+    if (!fs::exists(path))
     {
         std::cout << "File not found: " << path.string();
         return EXIT_FAILURE;
@@ -120,9 +118,9 @@ int Inference::tag_request(cv::Mat feature, std::ostringstream *out)
     std::string errBuffer;
 
     std::string json = "{\"feature\": \"" + encoded_feature + "\"}";
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1 );
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     curl_easy_setopt(curl, CURLOPT_PROXY, "");
-    //curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
+    // curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errBuffer);
     curl_easy_setopt(curl, CURLOPT_POST, 1);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json.c_str()));

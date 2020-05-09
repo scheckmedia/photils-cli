@@ -7,13 +7,25 @@
 #define API_URL "https://api.photils.app/tags"
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui.hpp>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/model.h>
 
 #include <curl/curl.h>
 #include <json/json.h>
-#include <filesystem>
+
+#if defined(__cplusplus) && __cplusplus >= 201703L && defined(__has_include)
+#    if __has_include(<filesystem>)
+#        define GHC_USE_STD_FS
+#        include <filesystem>
+namespace fs = std::filesystem;
+#    endif
+#endif
+#ifndef GHC_USE_STD_FS
+#    include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
 
 namespace photils
 {
@@ -22,11 +34,11 @@ class Inference
 public:
     static Inference &get_instance()
     {
-        static Inference instance;        
+        static Inference instance;
         return instance;
     }
 
-    void set_app_path(std::filesystem::path app_path);
+    void set_app_path(fs::path app_path);
     int get_tags(std::string filepath, std::ostringstream *out);
 
     Inference(Inference const &) = delete;
@@ -42,8 +54,7 @@ private:
 
     std::unique_ptr<tflite::FlatBufferModel> m_model;
     std::unique_ptr<tflite::Interpreter> m_interpreter;
-    std::filesystem::path m_app_path;
-
+    fs::path m_app_path;
 };
 } // namespace photils
 

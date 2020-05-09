@@ -1,22 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
 project(photils-cli)
 
-
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
+if(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+  set(MACOSX_BUNDLE_ICON_FILE photils.icns)
+  set(OSX_APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/appimage_resources/photils.icns)
+  set_source_files_properties(${OSX_APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
 
 include_directories(libs/cxxopts/include)
+include_directories(libs/filesystem/include)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
@@ -46,6 +53,8 @@ include_directories(
 find_package(OpenCV 4.1.0 COMPONENTS core imgproc imgcodecs highgui REQUIRED)
 find_package(CURL REQUIRED)
 
+message("test: ${OpenCV_LIBRARIES}")
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_directories(${JSONCPP_LIBRARY_DIRS})
@@ -59,14 +68,40 @@ include_directories(
   )
 
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(${PROJECT_NAME} ${SRC})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} Threads::Threads)
+if(APPLE)
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${OSX_APP_ICON} ${SRC})
+else()
+  add_executable(${PROJECT_NAME} ${SRC})
+endif()
+message(${TFLITE_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} Threads::Threads)
 
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
-add_custom_command(
- TARGET ${PROJECT_NAME} POST_BUILD
- COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/res/model.* ${RESOURCE_FOLDER}/share/photils/
-)
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/res/model.* ${RESOURCE_FOLDER}/share/photils/
+  )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-install(DIRECTORY  ${RESOURCE_FOLDER}/share/photils/ DESTINATION ${CMAKE_INSTALL_PREFIX}/share/photils)
+if(APPLE)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
+  set(DIRS "\${CMAKE_INSTALL_PREFIX}/share")
+  LIST(APPEND DIRS "${OpenCV_DIR}/lib")
+
+  install(TARGETS ${PROJECT_NAME}
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
+  )
+  install(DIRECTORY  ${RESOURCE_FOLDER}/share/photils/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app/Contents/share/photils)
+
+  install(CODE "
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\"  \"\"  \"${DIRS}\")
+  " COMPONENT Runtime)
+  # set(CPACK_GENERATOR "DRAGNDROP")
+  # include(CPack)
+else()
+  install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+  install(FILES appimage_resources/photils-cli.desktop DESTINATION share/applications/)
+  install(FILES appimage_resources/photils.svg DESTINATION share/icons/)
+  install(DIRECTORY  ${RESOURCE_FOLDER}/share/photils/ DESTINATION ${CMAKE_INSTALL_PREFIX}/share/photils)
+endif()

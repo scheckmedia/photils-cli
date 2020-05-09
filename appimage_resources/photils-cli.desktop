@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=photils-cli
+Exec=photils-cli %f
+Icon=photils
+Terminal=true
+Type=Application
+Categories=Application;
