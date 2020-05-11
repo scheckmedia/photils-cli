@@ -26,6 +26,6 @@ trap cleanup EXIT
 pushd "$BUILD_DIR"
 cmake $TRAVIS_BUILD_DIR -D TF_DIR=$TF_DIR -D OpenCV_DIR=$OCV_DIR -DCMAKE_INSTALL_PREFIX=$OUT
 make -j`nproc` && make install
-zip $TRAVIS_BUILD_DIR/releases/photils-cli.app.zip $OUT/photils-cli.app
-
-
+cd $OUT
+zip -r $TRAVIS_BUILD_DIR/releases/photils-cli.zip *
+cd $TEMP_BASE
