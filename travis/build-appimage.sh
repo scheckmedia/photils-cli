@@ -51,4 +51,4 @@ chmod +x linuxdeploy*.AppImage
 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
 
 # move built AppImage back into original CWD
-mv photils-cli*.AppImage $TRAVIS_BUILD_DIR/releases/photils-cli.AppImage
+mv photils-cli*.AppImage $TRAVIS_BUILD_DIR/releases/photils-cli-linux-x86_64.AppImage

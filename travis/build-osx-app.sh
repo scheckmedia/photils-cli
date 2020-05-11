@@ -27,5 +27,5 @@ pushd "$BUILD_DIR"
 cmake $TRAVIS_BUILD_DIR -D TF_DIR=$TF_DIR -D OpenCV_DIR=$OCV_DIR -DCMAKE_INSTALL_PREFIX=$OUT
 make -j`nproc` && make install
 cd $OUT
-zip -r $TRAVIS_BUILD_DIR/releases/photils-cli.zip *
+zip -r $TRAVIS_BUILD_DIR/releases/photils-cli-osx.zip *
 cd $TEMP_BASE
