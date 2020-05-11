@@ -1,5 +1,4 @@
 #include "inference.h"
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -9,7 +8,6 @@
 #include "base64.h"
 
 using namespace photils;
-using namespace std::chrono_literals;
 
 void Inference::set_app_path(fs::path app_path)
 {
