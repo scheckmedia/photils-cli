@@ -16,10 +16,10 @@ install:
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt install gcc-9 g++-9;
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9;
-    sudo apt-get -y install libcurl4-gnutls-dev libjsoncpp-dev git wget unzip python3 curl build-essential zlib1g-dev python3-numpy python3-six;
+    sudo apt-get -y install libjsoncpp-dev git wget unzip python3 build-essential zlib1g-dev python3-numpy python3-six;
   fi
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew install jsoncpp curl;
+    brew install jsoncpp;
   fi
 script:
 - mkdir $TRAVIS_BUILD_DIR/releases

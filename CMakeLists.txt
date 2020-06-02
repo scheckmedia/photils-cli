@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(photils-cli)
 
-set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
 if(APPLE)
@@ -51,10 +50,6 @@ include_directories(
 )
 
 find_package(OpenCV 4.1.0 COMPONENTS core imgproc imgcodecs highgui REQUIRED)
-find_package(CURL REQUIRED)
-
-message("test: ${OpenCV_LIBRARIES}")
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_directories(${JSONCPP_LIBRARY_DIRS})
@@ -79,7 +74,7 @@ target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JS
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
   add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/res/model.* ${RESOURCE_FOLDER}/share/photils/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/res/* ${RESOURCE_FOLDER}/share/photils/
   )
 
 if(APPLE)
