@@ -13,25 +13,16 @@ void Inference::set_app_path(fs::path app_path) { this->m_app_path = app_path; }
 
 int Inference::get_tags(std::string filepath, std::ostringstream *out,
                         bool with_confidence) {
-  if (!fs::exists(filepath)) {
-    std::cout << "File does not exist!\n" << filepath << std::endl;
+
+  cv::Mat image;
+  if (prepare_image(filepath, image) != EXIT_SUCCESS)
     return EXIT_FAILURE;
-  }
 
   if (load_labels() != EXIT_SUCCESS)
     return EXIT_FAILURE;
 
   if (m_interpreter == nullptr && load_model() != EXIT_SUCCESS)
     return EXIT_FAILURE;
-
-  auto image = cv::imread(filepath);
-  if (image.empty())
-    return EXIT_FAILURE;
-
-  cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-  cv::resize(image, image, cv::Size(CNN_INPUT_WIDHT, CNN_INPUT_HEIGHT), 0, 0,
-             cv::InterpolationFlags::INTER_NEAREST);
-  image.convertTo(image, CV_32FC3, 1 / 255.0, -1.0);
 
   std::vector<Prediction> predictions;
   int ret = get_predictions(image, predictions);
@@ -48,7 +39,7 @@ int Inference::get_tags(std::string filepath, std::ostringstream *out,
   return ret;
 }
 
-int Inference::get_predictions(cv::Mat image,
+int Inference::get_predictions(const cv::Mat &image,
                                std::vector<Prediction> &predictions) {
   auto input = m_interpreter->typed_tensor<float>(0);
 
@@ -70,6 +61,36 @@ int Inference::get_predictions(cv::Mat image,
 
   std::sort(predictions.begin(), predictions.end(), std::greater<>());
   return ret;
+}
+
+int Inference::prepare_image(std::string &filepath, cv::Mat &dest) {
+  if (!fs::exists(filepath)) {
+    std::cout << "File does not exist!\n" << filepath << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  auto image = cv::imread(filepath);
+  if (image.empty())
+    return EXIT_FAILURE;
+
+  float scale =
+      static_cast<float>(CNN_INPUT_SIZE) / std::min(image.rows, image.cols);
+  float nw = image.cols * scale;
+  float nh = image.rows * scale;
+  float half = CNN_INPUT_SIZE / 2.0;
+  float cx = nw / 2.0;
+  float cy = nh / 2.0;
+  auto roi = cv::Rect(cx - half, cy - half, CNN_INPUT_SIZE, CNN_INPUT_SIZE);
+
+  cv::resize(image, image, cv::Size(nw, nh), 0, 0,
+             cv::InterpolationFlags::INTER_NEAREST);
+
+  image = image(roi);
+  cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+  image.convertTo(image, CV_32FC3, 1 / 127.5, -1.0);
+  dest = image;
+
+  return EXIT_SUCCESS;
 }
 
 int Inference::load_model() {

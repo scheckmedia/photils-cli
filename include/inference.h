@@ -10,9 +10,8 @@
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/model.h>
 
+#define CNN_INPUT_SIZE 224
 #define CNN_MODEL_PATH "../share/photils/model.tflite"
-#define CNN_INPUT_WIDHT 224
-#define CNN_INPUT_HEIGHT 224
 #define LABELS_PATH "../share/photils/labels.json"
 
 namespace photils {
@@ -50,7 +49,9 @@ private:
 
   int load_model();
   int load_labels();
-  int get_predictions(cv::Mat image, std::vector<Prediction> &predictions);
+  int get_predictions(const cv::Mat &image,
+                      std::vector<Prediction> &predictions);
+  int prepare_image(std::string &filepath, cv::Mat &dest);
 
   std::unique_ptr<tflite::FlatBufferModel> m_model;
   std::unique_ptr<tflite::Interpreter> m_interpreter;
