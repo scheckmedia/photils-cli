@@ -38,5 +38,4 @@ deploy:
   name: master
   on:
     tags: scheckmedia/photils-cli
-    branch: master
   skip_cleanup: 'true'
