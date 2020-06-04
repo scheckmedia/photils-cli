@@ -75,8 +75,8 @@ int Inference::prepare_image(std::string &filepath, cv::Mat &dest) {
 
   float scale =
       static_cast<float>(CNN_INPUT_SIZE) / std::min(image.rows, image.cols);
-  float nw = image.cols * scale;
-  float nh = image.rows * scale;
+  float nw = round(image.cols * scale);
+  float nh = round(image.rows * scale);
   float half = CNN_INPUT_SIZE / 2.0;
   float cx = nw / 2.0;
   float cy = nh / 2.0;
