@@ -33,7 +33,13 @@ int main(int argc, char *argv[]) {
 
     auto result = options.parse(argc, argv);
 
-    if (result.count("help")) {
+    // if I call photils-cli -v then argc = 1 and length of argv = 2
+    // that's the reason for manual counting
+    int num_args = 0;
+    while (argv[num_args] != NULL)
+      ++num_args;
+
+    if (num_args == 1 || result.count("help")) {
       std::cout << options.help() << std::endl;
       return EXIT_SUCCESS;
     }
