@@ -69,7 +69,7 @@ else()
   add_executable(${PROJECT_NAME} ${SRC})
 endif()
 message(${TFLITE_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} Threads::Threads)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} Threads::Threads stdc++fs)
 
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
   add_custom_command(
