@@ -37,4 +37,4 @@ deploy:
   name: master
   on:
     tags: true
-  cleanup: false
+  skip_cleanup: true
