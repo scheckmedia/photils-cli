@@ -4,30 +4,30 @@ sudo: true
 dist: bionic
 osx_image: xcode10.3
 os:
-- osx
-- linux
+  - osx
+  - linux
 before_install:
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then    
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get update;
-  fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
 install:
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt install gcc-8 g++-8;
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8;
-    sudo apt-get -y install libjsoncpp-dev git wget unzip python3 build-essential zlib1g-dev python3-numpy python3-six;
-  fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew install jsoncpp;
-  fi
+    sudo apt-get -y install libexiv2-dev libjsoncpp-dev git wget unzip python3 build-essential zlib1g-dev python3-numpy python3-six;
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    brew install jsoncpp exiv2;
+    fi
 script:
-- mkdir $TRAVIS_BUILD_DIR/releases
-- bash $TRAVIS_BUILD_DIR/travis/build-opencv4.sh
-- bash $TRAVIS_BUILD_DIR/travis/build-tensorflow-lite.sh > /dev/null 2>&1
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then bash $TRAVIS_BUILD_DIR/travis/build-appimage.sh;
-  fi
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then bash $TRAVIS_BUILD_DIR/travis/build-osx-app.sh;
-  fi
+  - mkdir $TRAVIS_BUILD_DIR/releases
+  - bash $TRAVIS_BUILD_DIR/travis/build-opencv4.sh
+  - bash $TRAVIS_BUILD_DIR/travis/build-tensorflow-lite.sh > /dev/null 2>&1
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then bash $TRAVIS_BUILD_DIR/travis/build-appimage.sh;
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then bash $TRAVIS_BUILD_DIR/travis/build-osx-app.sh;
+    fi
 deploy:
   provider: releases
   api_key:
