@@ -14,49 +14,51 @@
 #define CNN_MODEL_PATH "../share/photils/model.tflite"
 #define LABELS_PATH "../share/photils/labels.json"
 
-namespace photils {
-class Inference {
+namespace photils
+{
+class Inference
+{
 public:
-  struct Prediction {
-    Prediction(std::string lbl, float conf) : label(lbl), confidence(conf) {}
+    struct Prediction
+    {
+        Prediction(std::string lbl, float conf)
+            : label(lbl)
+            , confidence(conf)
+        {
+        }
 
-    std::string label;
-    float confidence;
+        std::string label;
+        float confidence;
 
-    bool operator<(const Prediction &other) const {
-      return confidence < other.confidence;
+        bool operator<(const Prediction &other) const { return confidence < other.confidence; }
+
+        bool operator>(const Prediction &other) const { return confidence > other.confidence; }
+    };
+
+    static Inference &get_instance()
+    {
+        static Inference instance;
+        return instance;
     }
 
-    bool operator>(const Prediction &other) const {
-      return confidence > other.confidence;
-    }
-  };
+    void set_app_path(fs::path app_path);
+    int get_tags(std::string filepath, std::ostringstream *out, bool with_confidence);
 
-  static Inference &get_instance() {
-    static Inference instance;
-    return instance;
-  }
-
-  void set_app_path(fs::path app_path);
-  int get_tags(std::string filepath, std::ostringstream *out,
-               bool with_confidence);
-
-  Inference(Inference const &) = delete;
-  void operator=(Inference const &) = delete;
+    Inference(Inference const &) = delete;
+    void operator=(Inference const &) = delete;
 
 private:
-  Inference() = default;
+    Inference() = default;
 
-  int load_model();
-  int load_labels();
-  int get_predictions(const cv::Mat &image,
-                      std::vector<Prediction> &predictions);
-  int prepare_image(std::string &filepath, cv::Mat &dest);
+    int load_model();
+    int load_labels();
+    int get_predictions(const cv::Mat &image, std::vector<Prediction> &predictions);
+    int prepare_image(std::string &filepath, cv::Mat &dest);
 
-  std::unique_ptr<tflite::FlatBufferModel> m_model;
-  std::unique_ptr<tflite::Interpreter> m_interpreter;
-  std::vector<std::string> m_labels;
-  fs::path m_app_path;
+    std::unique_ptr<tflite::FlatBufferModel> m_model;
+    std::unique_ptr<tflite::Interpreter> m_interpreter;
+    std::vector<std::string> m_labels;
+    fs::path m_app_path;
 };
 } // namespace photils
 

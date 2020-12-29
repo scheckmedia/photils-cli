@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
+include(FeatureSummary)
+
 project(photils-cli)
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
@@ -10,11 +12,21 @@ if(APPLE)
   set_source_files_properties(${OSX_APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif()
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+find_package(exiv2 REQUIRED)
+set_package_properties("exiv2"     PROPERTIES
+                       DESCRIPTION "Required to build digiKam"
+                       URL         "https://www.exiv2.org"
+                       TYPE        RECOMMENDED
+                       PURPOSE     "Library to manage image metadata"
+)
+
 
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
@@ -59,6 +71,7 @@ get_filename_component(RESOURCE_FOLDER ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DIRECTO
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${JSONCPP_INCLUDE_DIRS}
+  $<TARGET_PROPERTY:exiv2lib,INTERFACE_INCLUDE_DIRECTORIES>
   ${PROJECT_SOURCE_DIR}/include
   )
 
@@ -69,7 +82,7 @@ else()
   add_executable(${PROJECT_NAME} ${SRC})
 endif()
 message(${TFLITE_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} Threads::Threads)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} exiv2lib Threads::Threads)
 
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
   add_custom_command(
