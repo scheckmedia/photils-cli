@@ -1,9 +1,9 @@
 # photils-cli
 [![Build Status](https://travis-ci.org/scheckmedia/photils-cli.svg?branch=master)](https://travis-ci.org/scheckmedia/photils-cli)
 
-Photils-cli is an application which passes the image through a neural network and generates a feature vector. This feature vector will be used to find similar images in a hosted online database ([photils.dev](https://photils.app/)) and the corresponding tags. The usage of the feature vector has this advantage that at no time your selected image will leave the PC. Rather a representation of the image is sent.
+Photils-cli is an application that passes an image through a neural network, classifies it, and extracts the suggested tags. Everything happens offline without the need that your data are sent over the internet.
 
-The reason for this plugin is mainly the integration into [darktable](https://www.darktable.org/) as [plugin](https://github.com/scheckmedia/photils-dt).
+The reason for this application is mainly the integration into [darktable](https://www.darktable.org/) as [plugin](https://github.com/scheckmedia/photils-dt).
 
 ## Installation
 ### Linux

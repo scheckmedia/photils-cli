@@ -77,12 +77,16 @@ include_directories(
 
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
 if(APPLE)
+  set(EXTRA_LIBS "")
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${OSX_APP_ICON} ${SRC})
 else()
+  set(EXTRA_LIBS "stdc++fs")
   add_executable(${PROJECT_NAME} ${SRC})
 endif()
 message(${TFLITE_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} exiv2lib Threads::Threads)
+message("Extra ${EXTRA_LIBS}")
+
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} exiv2lib Threads::Threads ${EXTRA_LIBS})
 
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
   add_custom_command(
