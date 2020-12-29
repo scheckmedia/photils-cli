@@ -12,12 +12,15 @@
 using namespace std;
 using namespace photils;
 
-#define VERSION "0.2b"
+#define VERSION "0.3b"
 
 int main(int argc, char *argv[])
 {
     try
     {
+        Exiv2::XmpParser::initialize();
+        ::atexit(Exiv2::XmpParser::terminate);
+
         auto app_path = get_execution_path();
         std::string desc = "Extract meaningful keywords of your images - Version: " + std::string(VERSION);
 
