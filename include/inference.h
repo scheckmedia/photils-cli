@@ -54,10 +54,12 @@ private:
     int load_labels();
     int get_predictions(const cv::Mat &image, std::vector<Prediction> &predictions);
     int prepare_image(std::string &filepath, cv::Mat &dest);
+    void load_override_labels();
 
     std::unique_ptr<tflite::FlatBufferModel> m_model;
     std::unique_ptr<tflite::Interpreter> m_interpreter;
     std::vector<std::string> m_labels;
+    std::map<std::string, std::string> m_labels_override;
     fs::path m_app_path;
 };
 } // namespace photils

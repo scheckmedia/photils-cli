@@ -40,10 +40,41 @@ $ ./photils-cli.app/Contents/MacOS/photils-cli --image ~/Pictures/_DSC2437.jpg
 ```bash
 photils-cli [OPTION...]
 
--h, --help             print this help
--i, --image arg        Image to predict keywords
--o, --output_file arg  File where to write keywords. Optional (default: "")
+  -h, --help             print this help
+  -v, --version          print version
+  -i, --image arg        Image to predict keywords
+  -o, --output_file arg  File where to write keywords. Optional (default: "")
+  -c, --with_confidence  If flag is used a confidence value for each
+                         prediction is printed as well. Optional
 ```
+
+### Tag translation
+photils comes with a fixed list of ~3700 [available tags](https://github.com/scheckmedia/photils-cli/blob/master/res/labels.json). In some cases, the language or space-less tag style does not fit your workflow. For such cases, you have the option to override tags with your own style. For example, if you don't like the *blackbackground* tag and want *black background* instead, you can user the override file to fix this. You can also use it to translate the tags to the language of your choice.
+
+All what you need is to place a file named **override_labels.json** in the folder:
+| OS    | Path                                                           |
+| ----- | -------------------------------------------------------------- |
+| MacOS | $HOME/Library/Application Support/photils/override_labels.json |
+| Linux | $HOME/.local/share/photils/override_labels.json                |
+
+with a structure like:
+```json
+{
+  "tag_name": "new_tag_name"
+}
+```
+For example, a simple translation into German of 4 tags looks like this:
+
+```json
+{
+    "art": "kunst",
+    "shadow": "schatten",
+    "light": "licht",
+    "blackbackground": "schwarzer hintergrund"
+}
+```
+
+*If you have done a translation of the available tags, please share it with us for the community. Thanks!*
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

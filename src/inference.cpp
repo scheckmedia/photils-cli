@@ -27,6 +27,8 @@ int Inference::get_tags(std::string filepath, std::ostringstream *out, bool with
     if (m_interpreter == nullptr && load_model() != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
+    load_override_labels();
+
     std::vector<Prediction> predictions;
     int ret = get_predictions(image, predictions);
     if (ret != kTfLiteOk)
@@ -58,8 +60,14 @@ int Inference::get_predictions(const cv::Mat &image, std::vector<Prediction> &pr
     for (int i = 0; i < pred_vector.size(); ++i)
     {
         auto conf = pred_vector.at(i);
-        auto pred = Prediction(m_labels.at(i), conf);
+        auto label = m_labels.at(i);
 
+        if (m_labels_override.count(label))
+        {
+            label = m_labels_override[label];
+        }
+
+        auto pred = Prediction(label, conf);
         predictions.push_back(pred);
     }
 
@@ -151,4 +159,31 @@ int Inference::load_labels()
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
+}
+
+void Inference::load_override_labels()
+{
+    auto data_home = get_data_home();
+    auto label_path = data_home / "override_labels.json";
+    auto labels_data = std::ifstream(label_path);
+
+    if (!fs::exists(label_path))
+    {
+        return;
+    }
+
+    Json::Value data;
+    Json::CharReaderBuilder json_builder;
+    std::string err;
+    if (!Json::parseFromStream(json_builder, labels_data, &data, &err))
+    {
+        return;
+    }
+
+    for (auto const &id : data.getMemberNames())
+    {
+        auto label = id;
+        auto override = data[id].asString();
+        m_labels_override.insert({id, data[id].asString()});
+    }
 }

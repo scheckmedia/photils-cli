@@ -1,4 +1,5 @@
 #include "helper.h"
+#include <cstdlib>
 #include <opencv2/highgui.hpp>
 
 using namespace photils;
@@ -18,6 +19,21 @@ fs::path photils::get_execution_path()
 #endif
 
     return app_path;
+}
+
+fs::path photils::get_data_home()
+{
+    auto data_home = fs::path();
+#if __APPLE__
+    data_home = fs::path(std::getenv("HOME")) / "Library" / "Application Support" / "photils";
+#else
+    data_home = fs::path(std::getenv("HOME")) / ".local" / "share" / "photils";
+#endif
+
+    if (!fs::exists(data_home))
+        fs::create_directories(data_home);
+
+    return data_home;
 }
 
 cv::Mat photils::get_preview_image(const std::string &filepath, const cv::Size2i minSize)

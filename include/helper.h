@@ -23,6 +23,7 @@ namespace fs = ghc::filesystem;
 namespace photils
 {
 fs::path get_execution_path();
+fs::path get_data_home();
 cv::Mat get_preview_image(const std::string &filepath, const cv::Size2i minSize);
 }
 
