@@ -2,7 +2,7 @@ language: cpp
 compiler: gcc
 sudo: true
 dist: bionic
-osx_image: xcode10.3
+osx_image: xcode11.0
 os:
   - osx
   - linux
@@ -15,10 +15,10 @@ install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt install gcc-8 g++-8;
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8;
-    sudo apt-get -y install libexiv2-dev libjsoncpp-dev git wget unzip python3 build-essential zlib1g-dev python3-numpy python3-six;
+    sudo apt-get -y install exiv2 libexiv2-dev libjsoncpp-dev git wget unzip python3 build-essential zlib1g-dev python3-numpy python3-six;
     fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew install jsoncpp exiv2;
+    brew install jsoncpp exiv2 libssh;
     fi
 script:
   - mkdir $TRAVIS_BUILD_DIR/releases

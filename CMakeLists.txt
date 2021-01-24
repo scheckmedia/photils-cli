@@ -12,22 +12,18 @@ if(APPLE)
   set_source_files_properties(${OSX_APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif()
 
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED OFF)
-
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 find_package(Threads REQUIRED)
+find_package(PkgConfig REQUIRED)
 
-find_package(exiv2 REQUIRED)
-set_package_properties("exiv2"     PROPERTIES
-                       DESCRIPTION "Required to build digiKam"
-                       URL         "https://www.exiv2.org"
-                       TYPE        RECOMMENDED
-                       PURPOSE     "Library to manage image metadata"
-)
-
-
+pkg_check_modules(EXIV2 exiv2)
+link_directories(${EXIV2_LIBRARY_DIRS})
+include_directories(${EXIV2_INCLUDE_DIR})
+include_directories(/usr/local/include)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin)
@@ -62,7 +58,7 @@ include_directories(
 )
 
 find_package(OpenCV 4.1.0 COMPONENTS core imgproc imgcodecs highgui REQUIRED)
-find_package(PkgConfig REQUIRED)
+
 pkg_check_modules(JSONCPP jsoncpp)
 link_directories(${JSONCPP_LIBRARY_DIRS})
 
@@ -71,7 +67,7 @@ get_filename_component(RESOURCE_FOLDER ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DIRECTO
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${JSONCPP_INCLUDE_DIRS}
-  $<TARGET_PROPERTY:exiv2lib,INTERFACE_INCLUDE_DIRECTORIES>
+  ${EXIV2_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/include
   )
 
@@ -84,9 +80,8 @@ else()
   add_executable(${PROJECT_NAME} ${SRC})
 endif()
 message(${TFLITE_LIBRARY})
-message("Extra ${EXTRA_LIBS}")
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} exiv2lib Threads::Threads ${EXTRA_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${JSONCPP_LIBRARIES} ${TFLITE_LIBRARY} exiv2 Threads::Threads ${EXTRA_LIBS})
 
 file(MAKE_DIRECTORY ${RESOURCE_FOLDER}/share/photils/)
   add_custom_command(
