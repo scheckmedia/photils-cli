@@ -479,7 +479,7 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# QtCreator 4.8< compilation database 
+# QtCreator 4.8< compilation database
 compile_commands.json
 
 ##### MonoDevelop
@@ -833,7 +833,7 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-# BeatPulse healthcheck temp database 
+# BeatPulse healthcheck temp database
 healthchecksdb
 
 ##### Gradle
@@ -910,4 +910,3 @@ _deps
 *.exe
 *.out
 *.app
-

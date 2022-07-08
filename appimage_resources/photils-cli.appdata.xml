@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>photils-cli</id>
+	<metadata_license>GPL-3.0</metadata_license>
+	<project_license>GPL-3.0</project_license>
+	<name>photils-cli</name>
+	<summary>Predict keywords for a given image</summary>
+	<description>
+		<p>Photils-cli is an application that passes an image through a neural network, classifies it, and extracts the suggested tags. Everything happens offline without the need that your data are sent over the internet.</p>
+	</description>
+	<launchable type="desktop-id">photils-cli.desktop</launchable>
+	<url type="homepage">https://photils.app/</url>
+	<screenshots>
+		<screenshot type="default">
+			<image></image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<id>photils-cli.desktop</id>
+	</provides>
+</component>

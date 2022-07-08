@@ -6,6 +6,9 @@ Photils-cli is an application that passes an image through a neural network, cla
 The reason for this application is mainly the integration into [darktable](https://www.darktable.org/) as [plugin](https://github.com/scheckmedia/photils-dt).
 
 ## Installation
+## Conan
+conan profile update settings.compiler.libcxx=libstdc++11 default
+
 ### Linux
  [![](https://img.shields.io/badge/Linux%40latest-Download-blue)](
 https://github.com/scheckmedia/photils-cli/releases/latest/download/photils-cli-linux-x86_64.AppImage)

@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-yaml
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+  - repo: https://github.com/PyCQA/pylint
+    rev: v2.14.3 # Use the sha / tag you want to point at
+    hooks:
+      - id: pylint
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
