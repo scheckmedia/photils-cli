@@ -1,7 +1,0 @@
-[submodule "libs/cxxopts"]
-	path = libs/cxxopts
-	url = https://github.com/jarro2783/cxxopts.git
-
-[submodule "libs/filesystem"]
-	path = libs/filesystem
-	url = https://github.com/gulrak/filesystem.git

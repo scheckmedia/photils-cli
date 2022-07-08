@@ -1,0 +1,11 @@
+[requires]
+opencv/4.5.5
+jsoncpp/1.8.3
+cxxopts/3.0.0
+ghc-filesystem/1.5.12
+
+[options]
+opencv:with_ffmpeg=False
+
+[generators]
+cmake

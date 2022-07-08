@@ -7,15 +7,15 @@
 	<rect x="0.257" y="-0.002" fill="#333333" width="141.731" height="141.732"/>
 </g>
 <g>
-	
+
 		<line opacity="0.2" fill="none" stroke="#BA3D3D" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="41.02" y1="37.036" x2="38.523" y2="28.479"/>
-	
+
 		<line opacity="0.2" fill="none" stroke="#BA3D3D" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="34.839" y1="6.302" x2="29.345" y2="19.304"/>
-	
+
 		<line opacity="0.2" fill="none" stroke="#BA3D3D" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="106.946" y1="13.88" x2="117.576" y2="18.997"/>
-	
+
 		<line opacity="0.2" fill="none" stroke="#BA3D3D" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="98.367" y1="84.152" x2="94.154" y2="51.661"/>
-	
+
 		<line opacity="0.2" fill="none" stroke="#BA3D3D" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="105.645" y1="70.085" x2="111.512" y2="72.922"/>
 	<g>
 		<g>
@@ -87,22 +87,22 @@
 	<g id="Icons_3_">
 		<g>
 			<g>
-				
+
 					<path fill="none" stroke="#BA3D3D" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
 					M84.939,87.249H57.92c-2.423,0-4.39-2.194-4.39-4.902V22.405c0-2.707,1.967-4.902,4.39-4.902h27.02
 					c2.424,0,4.39,2.195,4.39,4.902v59.941C89.329,85.055,87.363,87.249,84.939,87.249z"/>
-				
+
 					<rect x="53.53" y="26.323" fill="none" stroke="#BA3D3D" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="35.799" height="54.26"/>
 			</g>
 			<ellipse fill="#BA3D3D" stroke="#BA3D3D" stroke-miterlimit="10" cx="71.431" cy="83.81" rx="1.339" ry="1.496"/>
 			<g>
 				<ellipse fill="#BA3D3D" stroke="#BA3D3D" stroke-miterlimit="10" cx="77.41" cy="21.844" rx="0.761" ry="0.761"/>
-				
+
 					<line fill="none" stroke="#BA3D3D" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="64.693" y1="21.845" x2="72.416" y2="21.845"/>
 			</g>
-			
+
 				<line fill="none" stroke="#BA3D3D" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="64.131" y1="29.69" x2="58.178" y2="35.674"/>
-			
+
 				<line fill="none" stroke="#BA3D3D" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="65.232" y1="32.683" x2="61.521" y2="36.41"/>
 		</g>
 	</g>
