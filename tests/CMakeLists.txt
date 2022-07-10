@@ -9,6 +9,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
+set(CMAKE_CXX_STANDARD 14)
 
 file(GLOB_RECURSE TEST_SRC ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 
@@ -23,11 +24,20 @@ add_executable(
   ${TEST_SRC}
 )
 
+set_target_properties( ${PROJECT_NAME}_test
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}${CMAKE_BUILD_TYPE}//bin
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+)
+
 target_include_directories(${PROJECT_NAME}_test PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(
   ${PROJECT_NAME}_test
-  ${CONAN_LIBS} ${EXTRA_LIBS}
+  ${CONAN_LIBS}
   gtest_main
   gtest
 )

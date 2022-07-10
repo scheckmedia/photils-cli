@@ -21,7 +21,7 @@ TEST(Helper, centerCrop) {
                   .parent_path()
                   .parent_path();
   auto testImgPath = path / "tests" / "data" / "may-kiron105mm-0012.jpg";
-  auto img = cv::imread(testImgPath);
+  auto img = cv::imread(testImgPath.string());
 
   auto sourceImg = img.clone();
   photils::centerCrop(img, {128, 128});

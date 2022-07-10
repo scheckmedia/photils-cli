@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "inference.h"
 #include <algorithm>
 #include <fstream>

@@ -18,7 +18,7 @@ TEST(Inference, getTags) {
   auto tags = instance.getTags("no_file", false);
   ASSERT_EQ(tags.size(), 0);
 
-  tags = instance.getTags(testImgPath, false);
+  tags = instance.getTags(testImgPath.string(), false);
   ASSERT_TRUE(tags.size() > 0);
 
   auto cmp = [](photils::Prediction p) {
@@ -29,7 +29,6 @@ TEST(Inference, getTags) {
 }
 
 TEST(Inference, getTagsFromNEF) {
-  auto overrideLoc = photils::getDataHome() / "override_labels.json";
   auto path = photils::getExecutionPath()
                   .parent_path()
                   .parent_path()
@@ -38,7 +37,7 @@ TEST(Inference, getTagsFromNEF) {
   auto testImgPath = path / "tests" / "data" / "_DSC2555.NEF";
   auto& instance = photils::Inference::getInstance();
 
-  auto tags = instance.getTags(testImgPath, false);
+  auto tags = instance.getTags(testImgPath.string(), false);
   ASSERT_TRUE(tags.size() > 0);
 
   auto cmp = [](photils::Prediction p) {
@@ -50,7 +49,7 @@ TEST(Inference, getTagsFromNEF) {
 
 TEST(Inference, labelOverride) {
   auto overrideLoc = photils::getDataHome() / "override_labels.json";
-  std::ofstream out(overrideLoc);
+  std::ofstream out(overrideLoc, std::ios::trunc);
   out << std::string("{\"flower\":\"wtf\"}");
   out.close();
 
@@ -63,7 +62,7 @@ TEST(Inference, labelOverride) {
   auto testImgPath = path / "tests" / "data" / "_DSC2555.NEF";
   auto& instance = photils::Inference::getInstance();
 
-  auto tags = instance.getTags(testImgPath, false);
+  auto tags = instance.getTags(testImgPath.string(), false);
   ASSERT_TRUE(tags.size() > 0);
 
   auto cmp = [](photils::Prediction p) {
@@ -73,6 +72,6 @@ TEST(Inference, labelOverride) {
   ASSERT_TRUE(hasOverrideLabel);
 
   if (fs::exists(overrideLoc)) {
-    std::remove(overrideLoc.c_str());
+    std::remove(overrideLoc.string().c_str());
   }
 }
