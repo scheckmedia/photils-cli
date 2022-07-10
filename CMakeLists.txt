@@ -4,7 +4,7 @@ include(FeatureSummary)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build.")
 
 project(photils-cli)
-project(${PROJECT_NAME} VERSION "0.4.0")
+project(${PROJECT_NAME} VERSION "0.4.1")
 
 OPTION(BUILD_TESTS "Build test" ON)
 

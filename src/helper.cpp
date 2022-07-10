@@ -35,7 +35,8 @@ fs::path photils::getDataHome() {
   data_home = fs::path(std::getenv("HOME")) / "Library" /
               "Application Support" / "photils";
 #elif _WIN32
-  data_home = fs::path("USERPROFILE") / ".local" / "share" / "photils";
+  data_home =
+      fs::path(std::getenv("USERPROFILE")) / ".local" / "share" / "photils";
 #else
   data_home = fs::path(std::getenv("HOME")) / ".local" / "share" / "photils";
 #endif

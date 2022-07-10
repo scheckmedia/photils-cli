@@ -1,32 +1,29 @@
 # photils-cli
-[![Build Status](https://travis-ci.org/scheckmedia/photils-cli.svg?branch=master)](https://travis-ci.org/scheckmedia/photils-cli)
+![Build Status](https://github.com/scheckmedia/photils-cli/actions/workflows/build.yaml/badge.svg)
 
 Photils-cli is an application that passes an image through a neural network, classifies it, and extracts the suggested tags. Everything happens offline without the need that your data are sent over the internet.
 
 The reason for this application is mainly the integration into [darktable](https://www.darktable.org/) as [plugin](https://github.com/scheckmedia/photils-dt).
 
 ## Installation
-## Conan
-conan profile update settings.compiler.libcxx=libstdc++11 default
+
+[![](https://img.shields.io/badge/Releases%40latest-Download-blue)](https://github.com/scheckmedia/photils-cli/releases)
 
 ### Linux
- [![](https://img.shields.io/badge/Linux%40latest-Download-blue)](
-https://github.com/scheckmedia/photils-cli/releases/latest/download/photils-cli-linux-x86_64.AppImage)
 
-1. Download the latest release
+1. Download the latest release `photils-cli-VERSION-linux.zip`
 2. Copy the photils-cli.AppImage at some safe pleace
 3. Make the AppImage executable: https://youtu.be/nzZ6Ikc7juw
 
 ### MacOS
-[![](https://img.shields.io/badge/MacOS%40latest-Download-blue)](
-https://github.com/scheckmedia/photils-cli/releases/latest/download/photils-cli-osx.zip)
 
-1. Download the latest release
-2. Extract the zip and copy the photils-cli.app at some safe pleace
+1. Download the latest release `photils-cli-VERSION-osx.zip`
+2. Extract the zip and copy the photils-cli.app at some safe place
 
 ### Windows
-*work in progress*
 
+1. Download the latest release `photils-cli-VERSION-win64.zip`
+2. Extract the zip and copy the content of the zip at some safe place
 
 ## Usage
 #### Linux:
@@ -37,6 +34,11 @@ $ ./photils-cli.AppImage --image ~/Pictures/_DSC2437.jpg
 #### MacOS:
 ```bash
 $ ./photils-cli.app/Contents/MacOS/photils-cli --image ~/Pictures/_DSC2437.jpg
+```
+
+#### MacOS:
+```bash
+$ .\photils-cli.exe --image C:\Documents\somepic.jpg
 ```
 
 ### Args
@@ -55,10 +57,11 @@ photils-cli [OPTION...]
 photils comes with a fixed list of ~3700 [available tags](https://github.com/scheckmedia/photils-cli/blob/master/res/labels.json). In some cases, the language or space-less tag style does not fit your workflow. For such cases, you have the option to override tags with your own style. For example, if you don't like the *blackbackground* tag and want *black background* instead, you can user the override file to fix this. You can also use it to translate the tags to the language of your choice.
 
 All what you need is to place a file named **override_labels.json** in the folder:
-| OS    | Path                                                           |
-| ----- | -------------------------------------------------------------- |
-| MacOS | $HOME/Library/Application Support/photils/override_labels.json |
-| Linux | $HOME/.local/share/photils/override_labels.json                |
+| OS      | Path                                                           |
+| ------- | -------------------------------------------------------------- |
+| MacOS   | $HOME/Library/Application Support/photils/override_labels.json |
+| Linux   | $HOME/.local/share/photils/override_labels.json                |
+| Windwos | %userprofile%\\.local\share\photils\override_labels.json        |
 
 with a structure like:
 ```json
