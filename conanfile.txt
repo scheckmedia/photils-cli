@@ -6,6 +6,8 @@ ghc-filesystem/1.5.12
 
 [options]
 opencv:with_ffmpeg=False
+opencv:with_ade=False
+
 
 [generators]
 cmake

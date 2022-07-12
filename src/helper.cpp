@@ -1,7 +1,12 @@
+#define NOMINMAX
 #include "helper.h"
 #include <cstdlib>
+#include <iostream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using namespace photils;
 
@@ -13,6 +18,10 @@ fs::path photils::getExecutionPath() {
   if (_NSGetExecutablePath(buff, &size) == 0) {
     app_path.assign(buff).remove_filename();
   }
+#elif _WIN32
+  TCHAR path[MAX_PATH];
+  GetModuleFileName(NULL, path, MAX_PATH);
+  app_path.assign(path).remove_filename();
 #else
   app_path = fs::read_symlink("/proc/self/exe").remove_filename();
 #endif
@@ -25,6 +34,9 @@ fs::path photils::getDataHome() {
 #if __APPLE__
   data_home = fs::path(std::getenv("HOME")) / "Library" /
               "Application Support" / "photils";
+#elif _WIN32
+  data_home =
+      fs::path(std::getenv("USERPROFILE")) / ".local" / "share" / "photils";
 #else
   data_home = fs::path(std::getenv("HOME")) / ".local" / "share" / "photils";
 #endif

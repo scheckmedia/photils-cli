@@ -100,3 +100,50 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: ${{ env.BUILD_DIR }}/photils-cli-${{ env.VERSION }}-osx.zip
+  build-and-test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: prepare
+        run: |
+          pip3 install conan
+          conan profile new default --detect
+          mkdir ${{ env.BUILD_DIR }}
+      # caching seems to produces erros after once the cache was build
+      # - name: get conan cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #       ~/.conan/data
+      #     key: conan-${{ runner.os }}-${{ hashFiles('./conanfile.txt') }}
+      - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: conan install . --install-folder build --build=missing
+      - name: configure and build
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          cmake ..
+          cmake --build . --config Release
+      - name: run tests
+        run: ${{ env.BUILD_DIR }}/Release/bin/photils-cli_test
+      - run: |
+          echo VERSION=$(grep "PROJECT_VER " include/version.h | cut -d \" -f2) >> $GITHUB_ENV
+        shell: bash
+      - name: build windows zip
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cmake -DBUILD_TESTS=OFF ..
+          cmake --build . --config Release
+          cpack
+        working-directory: ${{ env.BUILD_DIR }}
+      - name: deploy
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v3
+        with:
+          name: photils-cli-${{ env.VERSION }}-win64
+          path: ${{ env.BUILD_DIR }}/*.zip
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: ${{ env.BUILD_DIR }}/photils-cli-${{ env.VERSION }}-win64.zip
