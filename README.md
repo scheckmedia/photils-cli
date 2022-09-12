@@ -36,7 +36,7 @@ $ ./photils-cli.AppImage --image ~/Pictures/_DSC2437.jpg
 $ ./photils-cli.app/Contents/MacOS/photils-cli --image ~/Pictures/_DSC2437.jpg
 ```
 
-#### MacOS:
+#### Windows:
 ```bash
 $ .\photils-cli.exe --image C:\Documents\somepic.jpg
 ```
