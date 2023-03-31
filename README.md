@@ -61,7 +61,7 @@ All what you need is to place a file named **override_labels.json** in the folde
 | ------- | -------------------------------------------------------------- |
 | MacOS   | $HOME/Library/Application Support/photils/override_labels.json |
 | Linux   | $HOME/.local/share/photils/override_labels.json                |
-| Windwos | %userprofile%\\.local\share\photils\override_labels.json        |
+| Windows | %userprofile%\\.local\share\photils\override_labels.json        |
 
 with a structure like:
 ```json
