@@ -8,14 +8,11 @@ project(${PROJECT_NAME} VERSION "0.4.1")
 
 OPTION(BUILD_TESTS "Build test" ON)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(NO_OUTPUT_DIRS)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-message("Runtime DIr: ${OUTPUT_REL}")
+message("Runtime dir: ${OUTPUT_REL}")
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
@@ -24,10 +21,14 @@ if(APPLE)
   set_source_files_properties(${OSX_APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif()
 
-
 file(GLOB_RECURSE PHOTILS_SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(JsonCpp REQUIRED)
+find_package(cxxopts REQUIRED)
+find_package(ghc_filesystem REQUIRED)
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 configure_file(${PROJECT_SOURCE_DIR}/include/version.h.in ${PROJECT_SOURCE_DIR}/include/version.h)
@@ -40,23 +41,33 @@ else()
   add_executable(${PROJECT_NAME} ${PHOTILS_SRC})
 endif()
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-set_target_properties( ${PROJECT_NAME}
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC
+  ${PROJECT_SOURCE_DIR}/include
+  ${OpenCV_INCLUDE_DIRS}
+  ${cxxopts_INCLUDE_DIRS}
+  ${ghc_filesystem_INCLUDE_DIRS}
+)
+set_target_properties(${PROJECT_NAME}
+  PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
+  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin
 )
 
-get_target_property( RESOURCE_FOLDER ${PROJECT_NAME} RUNTIME_OUTPUT_DIRECTORY)
+get_target_property(RESOURCE_FOLDER ${PROJECT_NAME} RUNTIME_OUTPUT_DIRECTORY)
 get_filename_component(RESOURCE_FOLDER ${RESOURCE_FOLDER} DIRECTORY)
 
+set(OpenCVModules opencv_core opencv_imgproc opencv_imgcodecs opencv_dnn)
 
-
-message("conan: ${CONAN_LIBS}")
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(
+  ${PROJECT_NAME}
+  PUBLIC
+  ${OpenCVModules} JsonCpp::JsonCpp cxxopts::cxxopts ghcFilesystem::ghc_filesystem
+)
 
 message("COPY Target: ${RESOURCE_FOLDER}")
 
